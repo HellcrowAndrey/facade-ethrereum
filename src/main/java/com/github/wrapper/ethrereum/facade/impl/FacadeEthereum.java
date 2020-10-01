@@ -62,7 +62,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
     public final KeyPair generateKeys() {
         try {
             ECKeyPair keys = Keys.createEcKeyPair();
-            var address = Numeric.prependHexPrefix(Keys.getAddress(keys));
+            String address = Numeric.prependHexPrefix(Keys.getAddress(keys));
             return new KeyPair(keys.getPrivateKey(), keys.getPublicKey(), address);
         } catch (InvalidAlgorithmParameterException |
                 NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -88,7 +88,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
     @Override
     public final TransactionData
     send(KeyPair keys, BigInteger gasPrice, String to, BigInteger value, BigInteger fee) {
-        var nonce = nonce(keys.getAddress());
+        BigInteger nonce = nonce(keys.getAddress());
         Credentials credentials = Credentials.create(
                 new ECKeyPair(keys.getPrivateKey(), keys.getPublicKey())
         );
@@ -163,8 +163,8 @@ public final class FacadeEthereum implements IFacadeEthereum {
     }
 
     private void information(Consumer<Information> information, Consumer<Throwable> errors) {
-        var gasPrice = this.gasPrice();
-        var fee = this.fee(gasPrice);
+        BigInteger gasPrice = this.gasPrice();
+        BigInteger fee = this.fee(gasPrice);
         Information info = new Information(fee, gasPrice);
         Observable.just(info)
                 .subscribe(information, errors)
@@ -255,8 +255,8 @@ public final class FacadeEthereum implements IFacadeEthereum {
     }
 
     private TransactionData toTransaction(Transaction tx) {
-        var gasPrice = tx.getGasPrice();
-        var fee = gasPrice.multiply(GAS_LIMIT);
+        BigInteger gasPrice = tx.getGasPrice();
+        BigInteger fee = gasPrice.multiply(GAS_LIMIT);
         return new TransactionData(
                 tx.getHash(), tx.getNonce(),
                 tx.getBlockHash(), tx.getBlockNumber(),
@@ -268,17 +268,17 @@ public final class FacadeEthereum implements IFacadeEthereum {
 
     private Optional<TransactionData> toContract(Transaction tx)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        var inputData = tx.getInput();
-        var addressTo = inputData.substring(10, 74);
-        var value = inputData.substring(74);
+        String inputData = tx.getInput();
+        String addressTo = inputData.substring(10, 74);
+        String value = inputData.substring(74);
         Method refMethod = TypeDecoder.class.getDeclaredMethod(
                 "decode", String.class, int.class, Class.class
         );
         refMethod.setAccessible(Boolean.TRUE);
         Address address = (Address) refMethod.invoke(null, addressTo, 0, Address.class);
         Uint256 amount = (Uint256) refMethod.invoke(null, value, 0, Uint256.class);
-        var gasPrice = tx.getGasPrice();
-        var fee = gasPrice.multiply(GAS_LIMIT);
+        BigInteger gasPrice = tx.getGasPrice();
+        BigInteger fee = gasPrice.multiply(GAS_LIMIT);
         return Optional.of(new TransactionData(
                 tx.getHash(), tx.getNonce(),
                 tx.getBlockHash(), tx.getBlockNumber(),
@@ -316,7 +316,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
             KeyPair keys, String contract,
             BigInteger gasPrice, String to,
             BigInteger value, BigInteger fee) {
-        var nonce = nonce(keys.getAddress());
+        BigInteger nonce = nonce(keys.getAddress());
         Credentials credentials = Credentials.create(
                 new ECKeyPair(keys.getPrivateKey(), keys.getPublicKey())
         );
