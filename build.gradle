@@ -8,7 +8,7 @@ repositories {
 
 group = 'com.github.wrapper.ethereum'
 version = '0.0.1'
-sourceCompatibility = '8'
+sourceCompatibility = '11'
 
 dependencies {
     compile ('org.web3j:core:4.6.3')
