@@ -45,7 +45,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static java.lang.Enum.valueOf;
 import static org.web3j.protocol.core.DefaultBlockParameterName.PENDING;
 import static org.web3j.tx.Transfer.GAS_LIMIT;
 
@@ -67,7 +66,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
     public final KeyPair generateKeys() {
         try {
             ECKeyPair keys = Keys.createEcKeyPair();
-            String address = Numeric.prependHexPrefix(Keys.getAddress(keys));
+            var address = Numeric.prependHexPrefix(Keys.getAddress(keys));
             return new KeyPair(keys.getPrivateKey(), keys.getPublicKey(), address);
         } catch (InvalidAlgorithmParameterException |
                 NoSuchAlgorithmException | NoSuchProviderException e) {
@@ -98,7 +97,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
     @Override
     public final TransactionData
     send(KeyPair keys, BigInteger gasPrice, String to, BigInteger value, BigInteger fee) {
-        BigInteger nonce = nonce(keys.getAddress());
+        var nonce = nonce(keys.getAddress());
         Credentials credentials = Credentials.create(
                 new ECKeyPair(keys.getPrivateKey(), keys.getPublicKey())
         );
@@ -129,8 +128,8 @@ public final class FacadeEthereum implements IFacadeEthereum {
             }
         } catch (IOException e) {
             log.warn("Enter: {}", e.getMessage());
+            throw new BroadcastException(-1, e.getMessage());
         }
-        throw new BroadcastException("Can't broadcast exception!");
     }
 
     @Override
@@ -153,11 +152,14 @@ public final class FacadeEthereum implements IFacadeEthereum {
             ).send();
             if (!response.hasError()) {
                 return response.getBalance();
+            } else {
+                Response.Error err = response.getError();
+                throw new BalanceException(err.getCode(), err.getMessage());
             }
         } catch (IOException e) {
             log.warn("Enter: {}", e.getMessage());
+            throw new BalanceException(-1, "Can't get balance by address");
         }
-        throw new BalanceException("Can't get balance by address");
     }
 
     @Override
@@ -170,9 +172,9 @@ public final class FacadeEthereum implements IFacadeEthereum {
 
     private void information(Consumer<Information> information, Consumer<Throwable> errors) {
         try {
-            BigInteger gasPrice = this.gasPrice();
+            var gasPrice = this.gasPrice();
             if (Objects.nonNull(gasPrice)) {
-                BigInteger fee = this.fee(gasPrice);
+                var fee = this.fee(gasPrice);
                 Information info = new Information(fee, gasPrice);
                 Observable.just(info)
                         .subscribe(information, errors)
@@ -267,8 +269,8 @@ public final class FacadeEthereum implements IFacadeEthereum {
     }
 
     private TransactionData toTransaction(Transaction tx) {
-        BigInteger gasPrice = tx.getGasPrice();
-        BigInteger fee = gasPrice.multiply(GAS_LIMIT);
+        var gasPrice = tx.getGasPrice();
+        var fee = gasPrice.multiply(GAS_LIMIT);
         return new TransactionData(
                 tx.getHash(), tx.getNonce(),
                 tx.getBlockHash(), tx.getBlockNumber(),
@@ -280,17 +282,17 @@ public final class FacadeEthereum implements IFacadeEthereum {
 
     private Optional<TransactionData> toContract(Transaction tx)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        String inputData = tx.getInput();
-        String addressTo = inputData.substring(10, 74);
-        String value = inputData.substring(74);
+        var inputData = tx.getInput();
+        var addressTo = inputData.substring(10, 74);
+        var value = inputData.substring(74);
         Method refMethod = TypeDecoder.class.getDeclaredMethod(
                 "decode", String.class, int.class, Class.class
         );
         refMethod.setAccessible(Boolean.TRUE);
         Address address = (Address) refMethod.invoke(null, addressTo, 0, Address.class);
         Uint256 amount = (Uint256) refMethod.invoke(null, value, 0, Uint256.class);
-        BigInteger gasPrice = tx.getGasPrice();
-        BigInteger fee = gasPrice.multiply(GAS_LIMIT);
+        var gasPrice = tx.getGasPrice();
+        var fee = gasPrice.multiply(GAS_LIMIT);
         return Optional.of(new TransactionData(
                 tx.getHash(), tx.getNonce(),
                 tx.getBlockHash(), tx.getBlockNumber(),
@@ -339,7 +341,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
             KeyPair keys, String contract,
             BigInteger gasPrice, String to,
             BigInteger value, BigInteger fee) {
-        BigInteger nonce = nonce(keys.getAddress());
+        var nonce = nonce(keys.getAddress());
         Credentials credentials = Credentials.create(
                 new ECKeyPair(keys.getPrivateKey(), keys.getPublicKey())
         );
@@ -361,8 +363,8 @@ public final class FacadeEthereum implements IFacadeEthereum {
             return con.balanceOf(credentials.getAddress()).send();
         } catch (Exception e) {
             log.warn("Enter: {}", e.getMessage());
+            throw new BalanceException(-1, e.getMessage());
         }
-        throw new BalanceException("Can't get balance.");
     }
 
     public TransactionData
@@ -379,11 +381,11 @@ public final class FacadeEthereum implements IFacadeEthereum {
                         from, to, value, fee
                 );
             } else {
-                throw new BroadcastException(-1, response.getStatus());
+                throw new BroadcastException(400, response.getStatus());
             }
         } catch (Exception e) {
             log.warn("Enter: {}", e.getMessage());
-            throw new BroadcastException("Can't send contract.");
+            throw new BroadcastException(-1, "Can't send contract.");
         }
     }
 
