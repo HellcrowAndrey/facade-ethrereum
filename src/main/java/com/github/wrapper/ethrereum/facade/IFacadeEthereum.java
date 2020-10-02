@@ -2,9 +2,12 @@ package com.github.wrapper.ethrereum.facade;
 
 import com.github.wrapper.ethrereum.model.Information;
 import com.github.wrapper.ethrereum.model.KeyPair;
+import com.github.wrapper.ethrereum.model.Response;
 import com.github.wrapper.ethrereum.model.TransactionData;
 import io.reactivex.functions.Consumer;
 
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.function.Supplier;
@@ -25,7 +28,7 @@ public interface IFacadeEthereum extends IFacadeTokenERC20 {
 
     BigInteger fee(BigInteger gasPrice);
 
-    BigInteger gasPrice();
+    BigInteger gasPrice() throws IOException;
 
     BigInteger balance(String address);
 
@@ -58,5 +61,11 @@ public interface IFacadeEthereum extends IFacadeTokenERC20 {
             Supplier<List<String>> usersAddresses,
             Supplier<List<String>> contractsAddresses
     );
+
+    BigInteger toWei(BigDecimal value);
+
+    BigDecimal fromWei(BigInteger value);
+
+
 
 }

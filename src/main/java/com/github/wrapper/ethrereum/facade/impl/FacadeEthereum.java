@@ -22,25 +22,30 @@ import org.web3j.crypto.Keys;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
+import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static java.lang.Enum.valueOf;
 import static org.web3j.protocol.core.DefaultBlockParameterName.PENDING;
 import static org.web3j.tx.Transfer.GAS_LIMIT;
 
@@ -78,6 +83,11 @@ public final class FacadeEthereum implements IFacadeEthereum {
                     .ethGetTransactionCount(address, PENDING).send();
             if (!response.hasError()) {
                 return response.getTransactionCount();
+            } else {
+                throw new NonceException(
+                        response.getError().getCode(),
+                        response.getError().getMessage()
+                );
             }
         } catch (IOException e) {
             log.warn("Enter: {}", e.getMessage());
@@ -113,6 +123,9 @@ public final class FacadeEthereum implements IFacadeEthereum {
                         "", BigInteger.ZERO, gasPrice,
                         GAS_LIMIT, from, to, value, fee
                 );
+            } else {
+                Response.Error err = response.getError();
+                throw new BroadcastException(err.getCode(), err.getMessage());
             }
         } catch (IOException e) {
             log.warn("Enter: {}", e.getMessage());
@@ -126,16 +139,9 @@ public final class FacadeEthereum implements IFacadeEthereum {
     }
 
     @Override
-    public final BigInteger gasPrice() {
-        try {
-            EthGasPrice response = this.web3j.ethGasPrice().send();
-            if (!response.hasError()) {
-                return response.getGasPrice();
-            }
-        } catch (IOException e) {
-            log.warn("Enter: {}", e.getMessage());
-        }
-        return BigInteger.ZERO;
+    public final BigInteger gasPrice() throws IOException {
+        EthGasPrice response = this.web3j.ethGasPrice().send();
+        return !response.hasError() ? response.getGasPrice() : null;
     }
 
     @Override
@@ -163,12 +169,18 @@ public final class FacadeEthereum implements IFacadeEthereum {
     }
 
     private void information(Consumer<Information> information, Consumer<Throwable> errors) {
-        BigInteger gasPrice = this.gasPrice();
-        BigInteger fee = this.fee(gasPrice);
-        Information info = new Information(fee, gasPrice);
-        Observable.just(info)
-                .subscribe(information, errors)
-                .dispose();
+        try {
+            BigInteger gasPrice = this.gasPrice();
+            if (Objects.nonNull(gasPrice)) {
+                BigInteger fee = this.fee(gasPrice);
+                Information info = new Information(fee, gasPrice);
+                Observable.just(info)
+                        .subscribe(information, errors)
+                        .dispose();
+            }
+        } catch (IOException e) {
+            log.warn("Enter: {}", e.getMessage());
+        }
     }
 
     @Override
@@ -305,6 +317,17 @@ public final class FacadeEthereum implements IFacadeEthereum {
         );
     }
 
+    @Override
+    public BigInteger toWei(BigDecimal value) {
+        return Convert.toWei(value, Convert.Unit.ETHER)
+                .toBigInteger();
+    }
+
+    @Override
+    public BigDecimal fromWei(BigInteger value) {
+        return Convert.fromWei(value.toString(), Convert.Unit.ETHER);
+    }
+
     private ERC20 load(String contract, Credentials credentials, BigInteger gasPrice) {
         ContractGasProvider cgp = new StaticGasProvider(gasPrice, GAS_LIMIT);
         TransactionManager tm = new RawTransactionManager(this.web3j, credentials);
@@ -355,11 +378,13 @@ public final class FacadeEthereum implements IFacadeEthereum {
                         gasPrice, GAS_LIMIT, addressContract,
                         from, to, value, fee
                 );
+            } else {
+                throw new BroadcastException(-1, response.getStatus());
             }
         } catch (Exception e) {
             log.warn("Enter: {}", e.getMessage());
+            throw new BroadcastException("Can't send contract.");
         }
-        throw new BroadcastException("Can't send contract.");
     }
 
 }
