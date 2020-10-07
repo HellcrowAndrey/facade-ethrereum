@@ -2,7 +2,6 @@ package com.github.wrapper.ethrereum.facade;
 
 import com.github.wrapper.ethrereum.model.Information;
 import com.github.wrapper.ethrereum.model.KeyPair;
-import com.github.wrapper.ethrereum.model.Response;
 import com.github.wrapper.ethrereum.model.TransactionData;
 import io.reactivex.functions.Consumer;
 
@@ -66,6 +65,17 @@ public interface IFacadeEthereum extends IFacadeTokenERC20 {
 
     BigDecimal fromWei(BigInteger value);
 
-
+    void blockTracker(
+            Supplier<Long> blockNumber,
+            Consumer<TransactionData> incomingEth,
+            Consumer<TransactionData> outgoingEth,
+            Consumer<TransactionData> incomingContract,
+            Consumer<TransactionData> outgoingContract,
+            Supplier<List<String>> usersAddresses,
+            Supplier<List<String>> contractsAddresses,
+            Consumer<Information> information,
+            Consumer<Long> currentBlockNumber,
+            Consumer<Throwable> errors
+    );
 
 }

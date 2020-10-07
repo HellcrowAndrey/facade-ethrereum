@@ -21,6 +21,7 @@ import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.RawTransaction;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.Response;
 import org.web3j.protocol.core.methods.response.*;
@@ -43,6 +44,9 @@ import java.security.NoSuchProviderException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 import static org.web3j.protocol.core.DefaultBlockParameterName.PENDING;
@@ -58,8 +62,17 @@ public final class FacadeEthereum implements IFacadeEthereum {
 
     private Subscription blockSub;
 
+    private int time;
+
+    private AtomicLong count;
+
     public FacadeEthereum(String url) {
         this.web3j = Web3j.build(new HttpService(url));
+    }
+
+    public FacadeEthereum(String url, int time) {
+        this.web3j = Web3j.build(new HttpService(url));
+        this.time = time;
     }
 
     @Override
@@ -330,6 +343,177 @@ public final class FacadeEthereum implements IFacadeEthereum {
         return Convert.fromWei(value.toString(), Convert.Unit.ETHER);
     }
 
+    @Override
+    public void blockTracker(
+            Supplier<Long> blockNumber,
+            Consumer<TransactionData> incomingEth,
+            Consumer<TransactionData> outgoingEth,
+            Consumer<TransactionData> incomingContract,
+            Consumer<TransactionData> outgoingContract,
+            Supplier<List<String>> usersAddresses,
+            Supplier<List<String>> contractsAddresses,
+            Consumer<Information> information,
+            Consumer<Long> currentBlockNumber,
+            Consumer<Throwable> errors) {
+        this.count = new AtomicLong(blockNumber.get());
+        Executors.newSingleThreadScheduledExecutor()
+                .scheduleAtFixedRate(() -> startBlockTracker(
+                        incomingEth, outgoingEth,
+                        incomingContract, outgoingContract,
+                        usersAddresses, contractsAddresses,
+                        information, currentBlockNumber, errors
+                        ),
+                        BigInteger.ZERO.intValue(),
+                        this.time,
+                        TimeUnit.SECONDS
+                );
+    }
+
+    private void startBlockTracker(
+            Consumer<TransactionData> incomingEth,
+            Consumer<TransactionData> outgoingEth,
+            Consumer<TransactionData> incomingContract,
+            Consumer<TransactionData> outgoingContract,
+            Supplier<List<String>> usersAddresses,
+            Supplier<List<String>> contractsAddresses,
+            Consumer<Information> information,
+            Consumer<Long> currentBlockNumber,
+            Consumer<Throwable> errors
+    ) {
+        fetchBlock(this.count.incrementAndGet(), currentBlockNumber, errors)
+                .ifPresentOrElse(
+                        block -> blockHandler(
+                                block,
+                                incomingEth,
+                                outgoingEth,
+                                incomingContract,
+                                outgoingContract,
+                                usersAddresses,
+                                contractsAddresses,
+                                information,
+                                errors
+                        ),
+                        () -> this.count.decrementAndGet()
+                );
+    }
+
+    private void blockHandler(EthBlock.Block block,
+                              Consumer<TransactionData> incomingEth,
+                              Consumer<TransactionData> outgoingEth,
+                              Consumer<TransactionData> incomingContract,
+                              Consumer<TransactionData> outgoingContract,
+                              Supplier<List<String>> usersAddresses,
+                              Supplier<List<String>> contractsAddresses,
+                              Consumer<Information> information,
+                              Consumer<Throwable> errors) {
+        List<EthBlock.TransactionResult> transactions = block.getTransactions();
+        transactions.stream()
+                .map(t -> cast(t.get()))
+                .filter(Objects::nonNull)
+                .forEach(t -> transactions(
+                        t, incomingEth, outgoingEth,
+                        incomingContract, outgoingContract,
+                        usersAddresses, contractsAddresses, errors
+                        )
+                );
+        information(information, errors);
+    }
+
+    private Optional<EthBlock.Block> fetchBlock(Long number,
+                                                Consumer<Long> currentBlockNumber,
+                                                Consumer<Throwable> errors) {
+        EthBlock.Block block = null;
+        EthBlock response = blockRequest(BigInteger.valueOf(number));
+        if (Objects.nonNull(response)) {
+            block = response.getBlock();
+            Observable.just(number)
+                    .subscribe(currentBlockNumber, errors)
+                    .dispose();
+        }
+        return Optional.ofNullable(block);
+    }
+
+    private EthBlock blockRequest(BigInteger number) {
+        try {
+            return this.web3j
+                    .ethGetBlockByNumber(DefaultBlockParameter.valueOf(number), Boolean.TRUE)
+                    .send();
+        } catch (IOException e) {
+            log.warn("Enter: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    private void transactions(EthBlock.TransactionObject tx,
+                              Consumer<TransactionData> incomingEth,
+                              Consumer<TransactionData> outgoingEth,
+                              Consumer<TransactionData> incomingContract,
+                              Consumer<TransactionData> outgoingContract,
+                              Supplier<List<String>> usersAddresses,
+                              Supplier<List<String>> contractsAddresses,
+                              Consumer<Throwable> errors) {
+        List<String> addresses = usersAddresses.get();
+        List<String> contracts = contractsAddresses.get();
+        transactionsHandler(tx, incomingEth, outgoingEth, errors, addresses, contracts);
+        contractsHandler(tx, incomingContract, outgoingContract, errors, addresses, contracts);
+    }
+
+    private void transactionsHandler(EthBlock.TransactionObject tx,
+                                     Consumer<TransactionData> incomingEth,
+                                     Consumer<TransactionData> outgoingEth,
+                                     Consumer<Throwable> errors,
+                                     List<String> addresses,
+                                     List<String> contracts) {
+        Observable.just(tx)
+                .filter(trx -> !contracts.contains(trx.getTo()))
+                .filter(trx -> addresses.contains(trx.getTo()))
+                .map(this::toTransaction)
+                .subscribe(incomingEth, errors)
+                .dispose();
+        Observable.just(tx)
+                .filter(trx -> !contracts.contains(trx.getTo()))
+                .filter(trx -> addresses.contains(trx.getFrom()))
+                .map(this::toTransaction)
+                .subscribe(outgoingEth, errors)
+                .dispose();
+    }
+
+    private void contractsHandler(EthBlock.TransactionObject tx,
+                                  Consumer<TransactionData> incomingContract,
+                                  Consumer<TransactionData> outgoingContract,
+                                  Consumer<Throwable> errors,
+                                  List<String> addresses,
+                                  List<String> contracts) {
+        Observable.just(tx)
+                .filter(contract -> contracts.contains(contract.getTo()))
+                .map(this::toContract)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(trx -> addresses.contains(trx.getTo()))
+                .subscribe(incomingContract, errors)
+                .dispose();
+        Observable.just(tx)
+                .filter(contract -> contracts.contains(contract.getTo()))
+                .map(this::toContract)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .filter(trx -> addresses.contains(trx.getFrom()))
+                .subscribe(outgoingContract, errors)
+                .dispose();
+    }
+
+    private TransactionData toTransaction(EthBlock.TransactionObject tx) {
+        BigInteger gasPrice = tx.getGasPrice();
+        BigInteger fee = gasPrice.multiply(GAS_LIMIT);
+        return new TransactionData(
+                tx.getHash(), tx.getNonce(),
+                tx.getBlockHash(), tx.getBlockNumber(),
+                gasPrice, GAS_LIMIT,
+                tx.getFrom(), tx.getTo(),
+                tx.getValue(), fee
+        );
+    }
+
     private ERC20 load(String contract, Credentials credentials, BigInteger gasPrice) {
         ContractGasProvider cgp = new StaticGasProvider(gasPrice, GAS_LIMIT);
         TransactionManager tm = new RawTransactionManager(this.web3j, credentials);
@@ -387,6 +571,10 @@ public final class FacadeEthereum implements IFacadeEthereum {
             log.warn("Enter: {}", e.getMessage());
             throw new BroadcastException(-1, "Can't send contract.");
         }
+    }
+
+    private EthBlock.TransactionObject cast(Object t) {
+        return (EthBlock.TransactionObject) t;
     }
 
 }

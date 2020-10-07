@@ -6,7 +6,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
-import org.web3j.protocol.http.HttpService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -17,7 +16,10 @@ public class FacadeEthereumTest {
 
     @Before
     public void setUp() {
-        this.facade = new FacadeEthereum(HttpService.DEFAULT_URL);
+        this.facade = new FacadeEthereum(
+                "https://mainnet.infura.io/v3/bb5a88796ab14494bb1bf9173d4ce271",
+                10
+        );
     }
 
     @Test
