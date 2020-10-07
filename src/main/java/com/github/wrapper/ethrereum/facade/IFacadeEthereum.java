@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public interface IFacadeEthereum extends IFacadeTokenERC20 {
@@ -77,5 +78,7 @@ public interface IFacadeEthereum extends IFacadeTokenERC20 {
             Consumer<Long> currentBlockNumber,
             Consumer<Throwable> errors
     );
+
+    Optional<Long> bastBlock();
 
 }

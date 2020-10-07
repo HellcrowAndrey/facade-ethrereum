@@ -369,6 +369,21 @@ public final class FacadeEthereum implements IFacadeEthereum {
                 );
     }
 
+    @Override
+    public Optional<Long> bastBlock() {
+        try {
+            EthBlock response = this.web3j
+                    .ethGetBlockByNumber(DefaultBlockParameterName.LATEST, Boolean.TRUE)
+                    .send();
+            if (!response.hasError()) {
+                return Optional.of(response.getBlock().getNumber().longValue());
+            }
+        } catch (IOException e) {
+            log.warn("Enter: {}", e.getMessage());
+        }
+        return Optional.empty();
+    }
+
     private void startBlockTracker(
             Consumer<TransactionData> incomingEth,
             Consumer<TransactionData> outgoingEth,
