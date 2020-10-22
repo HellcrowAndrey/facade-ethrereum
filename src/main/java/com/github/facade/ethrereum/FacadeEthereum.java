@@ -1,13 +1,12 @@
-package com.github.wrapper.ethrereum.facade.impl;
+package com.github.facade.ethrereum;
 
-import com.github.wrapper.ethrereum.contracts.ERC20;
-import com.github.wrapper.ethrereum.exceptions.BalanceException;
-import com.github.wrapper.ethrereum.exceptions.BroadcastException;
-import com.github.wrapper.ethrereum.exceptions.NonceException;
-import com.github.wrapper.ethrereum.facade.IFacadeEthereum;
-import com.github.wrapper.ethrereum.model.Information;
-import com.github.wrapper.ethrereum.model.KeyPair;
-import com.github.wrapper.ethrereum.model.TransactionData;
+import com.github.facade.ethrereum.contracts.ERC20;
+import com.github.facade.ethrereum.exceptions.BalanceException;
+import com.github.facade.ethrereum.exceptions.BroadcastException;
+import com.github.facade.ethrereum.exceptions.NonceException;
+import com.github.facade.ethrereum.model.Information;
+import com.github.facade.ethrereum.model.KeyPair;
+import com.github.facade.ethrereum.model.TransactionData;
 import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
 import org.reactivestreams.Subscription;

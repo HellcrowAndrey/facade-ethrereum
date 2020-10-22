@@ -1,6 +1,6 @@
-package com.github.wrapper.ethrereum.facade.impl;
+package com.github.facade.ethrereum.facade.impl;
 
-import com.github.wrapper.ethrereum.model.KeyPair;
+import com.github.facade.ethrereum.model.KeyPair;
 
 import java.math.BigInteger;
 

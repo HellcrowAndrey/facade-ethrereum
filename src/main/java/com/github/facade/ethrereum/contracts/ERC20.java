@@ -1,7 +1,6 @@
-package com.github.wrapper.ethrereum.contracts;
+package com.github.facade.ethrereum.contracts;
 
 import io.reactivex.Flowable;
-import io.reactivex.Observable;
 import org.jetbrains.annotations.NotNull;
 import org.web3j.abi.EventEncoder;
 import org.web3j.abi.TypeReference;

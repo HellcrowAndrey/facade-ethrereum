@@ -1,8 +1,8 @@
-package com.github.wrapper.ethrereum.facade;
+package com.github.facade.ethrereum;
 
-import com.github.wrapper.ethrereum.model.Information;
-import com.github.wrapper.ethrereum.model.KeyPair;
-import com.github.wrapper.ethrereum.model.TransactionData;
+import com.github.facade.ethrereum.model.Information;
+import com.github.facade.ethrereum.model.KeyPair;
+import com.github.facade.ethrereum.model.TransactionData;
 import io.reactivex.functions.Consumer;
 
 import java.io.IOException;

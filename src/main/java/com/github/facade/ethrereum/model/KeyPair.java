@@ -1,4 +1,4 @@
-package com.github.wrapper.ethrereum.model;
+package com.github.facade.ethrereum.model;
 
 import java.math.BigInteger;
 import java.util.Objects;

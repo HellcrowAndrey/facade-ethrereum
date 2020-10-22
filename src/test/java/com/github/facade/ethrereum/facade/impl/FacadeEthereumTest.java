@@ -1,7 +1,8 @@
-package com.github.wrapper.ethrereum.facade.impl;
+package com.github.facade.ethrereum.facade.impl;
 
-import com.github.wrapper.ethrereum.facade.IFacadeEthereum;
-import com.github.wrapper.ethrereum.model.KeyPair;
+import com.github.facade.ethrereum.FacadeEthereum;
+import com.github.facade.ethrereum.IFacadeEthereum;
+import com.github.facade.ethrereum.model.KeyPair;
 import org.junit.Before;
 import org.junit.Test;
 import org.web3j.crypto.Credentials;
