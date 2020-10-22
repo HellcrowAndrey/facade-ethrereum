@@ -6,7 +6,7 @@ repositories {
     mavenCentral()
 }
 
-group = 'com.github.wrapper.ethereum'
+group = 'com.github.facade.ethereum'
 version = '0.0.8'
 sourceCompatibility = '11'
 
