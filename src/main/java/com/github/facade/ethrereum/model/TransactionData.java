@@ -137,7 +137,7 @@ public final class TransactionData {
         return input;
     }
 
-    public TransactionData contract(Pair pair) {
+    public TransactionData copy(Pair pair) {
         return new TransactionData(
                 this.hash,
                 this.nonce,

@@ -311,7 +311,8 @@ public final class FacadeEthereum implements IFacadeEthereum {
                 gasPrice, GAS_LIMIT,
                 tx.getTo(), tx.getFrom(),
                 address.toString(),
-                amount.getValue(), fee
+                amount.getValue(), fee,
+                ""
         ));
     }
 
@@ -595,7 +596,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
                         response.getTransactionHash(), nonce,
                         response.getBlockHash(), response.getBlockNumber(),
                         gasPrice, GAS_LIMIT, addressContract,
-                        from, to, value, fee
+                        from, to, value, fee, ""
                 );
             } else {
                 throw new BroadcastException(400, response.getStatus());
