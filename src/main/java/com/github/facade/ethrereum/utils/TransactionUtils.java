@@ -17,7 +17,7 @@ public class TransactionUtils {
                 tx.getBlockHash(), tx.getBlockNumber(),
                 gasPrice, GAS_LIMIT,
                 tx.getFrom(), tx.getTo(),
-                tx.getValue(), fee
+                tx.getValue(), fee, tx.getInput()
         );
     }
 

@@ -32,6 +32,8 @@ public final class TransactionData {
 
     private final BigInteger fee;
 
+    private final String input;
+
     @JsonCreator
     public TransactionData(
             @JsonProperty(value = "hash") String hash,
@@ -43,7 +45,8 @@ public final class TransactionData {
             @JsonProperty(value = "from") String from,
             @JsonProperty(value = "to") String to,
             @JsonProperty(value = "value") BigInteger value,
-            @JsonProperty(value = "fee") BigInteger fee) {
+            @JsonProperty(value = "fee") BigInteger fee,
+            @JsonProperty(value = "input") String input) {
         this.hash = hash;
         this.nonce = nonce;
         this.blockHash = blockHash;
@@ -55,6 +58,7 @@ public final class TransactionData {
         this.to = to;
         this.value = value;
         this.fee = fee;
+        this.input = input;
     }
 
     public TransactionData(
@@ -68,7 +72,8 @@ public final class TransactionData {
             String from,
             String to,
             BigInteger value,
-            BigInteger fee) {
+            BigInteger fee,
+            String input) {
         this.hash = hash;
         this.nonce = nonce;
         this.blockHash = blockHash;
@@ -80,6 +85,7 @@ public final class TransactionData {
         this.to = to;
         this.value = value;
         this.fee = fee;
+        this.input = input;
     }
 
     public String getHash() {
@@ -126,6 +132,10 @@ public final class TransactionData {
         return fee;
     }
 
+    public String getInput() {
+        return input;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -141,14 +151,16 @@ public final class TransactionData {
                 Objects.equals(from, that.from) &&
                 Objects.equals(to, that.to) &&
                 Objects.equals(value, that.value) &&
-                Objects.equals(fee, that.fee);
+                Objects.equals(fee, that.fee) &&
+                Objects.equals(input, that.input);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(
                 hash, nonce, blockHash, blockNumber,
-                gasPrice, gasLimit, contact, from, to, value, fee
+                gasPrice, gasLimit, contact, from,
+                to, value, fee, input
         );
     }
 

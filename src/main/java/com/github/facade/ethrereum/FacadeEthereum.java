@@ -132,7 +132,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
                 return new TransactionData(
                         response.getTransactionHash(), nonce,
                         "", BigInteger.ZERO, gasPrice,
-                        GAS_LIMIT, from, to, value, fee
+                        GAS_LIMIT, from, to, value, fee, ""
                 );
             } else {
                 Response.Error err = response.getError();
@@ -288,7 +288,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
                 tx.getBlockHash(), tx.getBlockNumber(),
                 gasPrice, GAS_LIMIT,
                 tx.getFrom(), tx.getTo(),
-                tx.getValue(), fee
+                tx.getValue(), fee, tx.getInput()
         );
     }
 
@@ -524,7 +524,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
                 tx.getBlockHash(), tx.getBlockNumber(),
                 gasPrice, GAS_LIMIT,
                 tx.getFrom(), tx.getTo(),
-                tx.getValue(), fee
+                tx.getValue(), fee, tx.getInput()
         );
     }
 
