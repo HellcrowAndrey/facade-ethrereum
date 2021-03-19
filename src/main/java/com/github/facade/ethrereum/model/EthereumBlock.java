@@ -6,19 +6,22 @@ import java.util.Objects;
 
 public class EthereumBlock {
 
-    private final String hash;
+    private String hash;
 
-    private final BigInteger number;
+    private BigInteger number;
 
-    private final BigInteger nonce;
+    private BigInteger nonce;
 
-    private final BigInteger size;
+    private BigInteger size;
 
-    private final BigInteger gasLimit;
+    private BigInteger gasLimit;
 
-    private final BigInteger gasUsed;
+    private BigInteger gasUsed;
 
-    private final List<TransactionData> transactions;
+    private List<TransactionData> transactions;
+
+    public EthereumBlock() {
+    }
 
     public EthereumBlock(
             String hash,
