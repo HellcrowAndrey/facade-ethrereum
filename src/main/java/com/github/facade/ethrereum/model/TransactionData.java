@@ -1,5 +1,8 @@
 package com.github.facade.ethrereum.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigInteger;
 import java.util.Objects;
 
@@ -29,17 +32,18 @@ public final class TransactionData {
 
     private final BigInteger fee;
 
+    @JsonCreator
     public TransactionData(
-            String hash,
-            BigInteger nonce,
-            String blockHash,
-            BigInteger blockNumber,
-            BigInteger gasPrice,
-            BigInteger gasLimit,
-            String from,
-            String to,
-            BigInteger value,
-            BigInteger fee) {
+            @JsonProperty(value = "hash") String hash,
+            @JsonProperty(value = "nonce") BigInteger nonce,
+            @JsonProperty(value = "blockHash") String blockHash,
+            @JsonProperty(value = "blockNumber") BigInteger blockNumber,
+            @JsonProperty(value = "gasPrice") BigInteger gasPrice,
+            @JsonProperty(value = "gasLimit") BigInteger gasLimit,
+            @JsonProperty(value = "from") String from,
+            @JsonProperty(value = "to") String to,
+            @JsonProperty(value = "value") BigInteger value,
+            @JsonProperty(value = "fee") BigInteger fee) {
         this.hash = hash;
         this.nonce = nonce;
         this.blockHash = blockHash;

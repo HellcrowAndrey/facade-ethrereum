@@ -1,36 +1,37 @@
 package com.github.facade.ethrereum.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Objects;
 
 public class EthereumBlock {
 
-    private String hash;
+    private final String hash;
 
-    private BigInteger number;
+    private final BigInteger number;
 
-    private BigInteger nonce;
+    private final BigInteger nonce;
 
-    private BigInteger size;
+    private final BigInteger size;
 
-    private BigInteger gasLimit;
+    private final BigInteger gasLimit;
 
-    private BigInteger gasUsed;
+    private final BigInteger gasUsed;
 
-    private List<TransactionData> transactions;
+    private final List<TransactionData> transactions;
 
-    public EthereumBlock() {
-    }
-
+    @JsonCreator
     public EthereumBlock(
-            String hash,
-            BigInteger number,
-            BigInteger nonce,
-            BigInteger size,
-            BigInteger gasLimit,
-            BigInteger gasUsed,
-            List<TransactionData> transactions) {
+            @JsonProperty(value = "hash") String hash,
+            @JsonProperty(value = "number") BigInteger number,
+            @JsonProperty(value = "nonce") BigInteger nonce,
+            @JsonProperty(value = "size")BigInteger size,
+            @JsonProperty(value = "gasLimit") BigInteger gasLimit,
+            @JsonProperty(value = "gasUsed")BigInteger gasUsed,
+            @JsonProperty(value = "transactions") List<TransactionData> transactions) {
         this.hash = hash;
         this.number = number;
         this.nonce = nonce;

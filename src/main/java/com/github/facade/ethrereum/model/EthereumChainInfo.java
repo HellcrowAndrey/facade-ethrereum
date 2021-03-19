@@ -1,18 +1,21 @@
 package com.github.facade.ethrereum.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.math.BigInteger;
 import java.util.Objects;
 
 public class EthereumChainInfo {
 
-    private EthereumBlock block;
+    private final EthereumBlock block;
 
-    private BigInteger gasPrice;
+    private final BigInteger gasPrice;
 
-    public EthereumChainInfo() {
-    }
-
-    public EthereumChainInfo(EthereumBlock block, BigInteger gasPrice) {
+    @JsonCreator
+    public EthereumChainInfo(
+            @JsonProperty(value = "block") EthereumBlock block,
+            @JsonProperty(value = "gasPrice") BigInteger gasPrice) {
         this.block = block;
         this.gasPrice = gasPrice;
     }
