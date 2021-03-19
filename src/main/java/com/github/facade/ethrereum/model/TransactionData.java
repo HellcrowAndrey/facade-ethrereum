@@ -152,13 +152,8 @@ public final class TransactionData {
     public String toString() {
         return "TransactionData{" +
                 "hash='" + hash + '\'' +
-                ", blockHash='" + blockHash + '\'' +
-                ", blockNumber=" + blockNumber +
-                ", contact='" + contact + '\'' +
                 ", from='" + from + '\'' +
                 ", to='" + to + '\'' +
-                ", value=" + value +
-                ", fee=" + fee +
                 '}';
     }
 }

@@ -78,8 +78,8 @@ public class ERC20 extends Contract {
     public RemoteCall<TransactionReceipt> approve(String spender, BigInteger value) {
         final Function function = new Function(
                 FUNC_APPROVE,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(spender),
-                        new org.web3j.abi.datatypes.generated.Uint256(value)),
+                Arrays.<Type>asList(new Address(spender),
+                        new Uint256(value)),
                 Collections.emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -95,9 +95,9 @@ public class ERC20 extends Contract {
     public RemoteCall<TransactionReceipt> transferFrom(String from, String to, BigInteger value) {
         final Function function = new Function(
                 FUNC_TRANSFERFROM,
-                Arrays.asList(new org.web3j.abi.datatypes.Address(from),
-                        new org.web3j.abi.datatypes.Address(to),
-                        new org.web3j.abi.datatypes.generated.Uint256(value)),
+                Arrays.asList(new Address(from),
+                        new Address(to),
+                        new Uint256(value)),
                 Collections.emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -112,7 +112,7 @@ public class ERC20 extends Contract {
 
     public RemoteCall<BigInteger> balanceOf(String who) {
         final Function function = new Function(FUNC_BALANCEOF,
-                Arrays.asList(new org.web3j.abi.datatypes.Address(who)),
+                Arrays.asList(new Address(who)),
                 Arrays.asList(new TypeReference<Uint256>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
@@ -121,25 +121,25 @@ public class ERC20 extends Contract {
     public RemoteCall<TransactionReceipt> transfer(String to, BigInteger value) {
         final Function function = new Function(
                 FUNC_TRANSFER,
-                Arrays.asList(new org.web3j.abi.datatypes.Address(to),
-                        new org.web3j.abi.datatypes.generated.Uint256(value)),
+                Arrays.asList(new Address(to),
+                        new Uint256(value)),
                 Collections.emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteCall<BigInteger> allowance(String owner, String spender) {
         final Function function = new Function(FUNC_ALLOWANCE,
-                Arrays.asList(new org.web3j.abi.datatypes.Address(owner),
-                        new org.web3j.abi.datatypes.Address(spender)),
+                Arrays.asList(new Address(owner),
+                        new Address(spender)),
                 Arrays.asList(new TypeReference<Uint256>() {
                 }));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
     public List<ApprovalEventResponse> getApprovalEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(APPROVAL_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(APPROVAL_EVENT, transactionReceipt);
         ArrayList<ApprovalEventResponse> responses = new ArrayList<ApprovalEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             ApprovalEventResponse typedResponse = new ApprovalEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -154,7 +154,7 @@ public class ERC20 extends Contract {
         return web3j.ethLogFlowable(filter).map(new io.reactivex.functions.Function<Log, ApprovalEventResponse>() {
             @Override
             public ApprovalEventResponse apply(@NotNull Log log) throws Exception {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(APPROVAL_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(APPROVAL_EVENT, log);
                 ApprovalEventResponse typedResponse = new ApprovalEventResponse();
                 typedResponse.log = log;
                 typedResponse.owner = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -172,9 +172,9 @@ public class ERC20 extends Contract {
     }
 
     public List<TransferEventResponse> getTransferEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(TRANSFER_EVENT, transactionReceipt);
+        List<EventValuesWithLog> valueList = extractEventParametersWithLog(TRANSFER_EVENT, transactionReceipt);
         ArrayList<TransferEventResponse> responses = new ArrayList<TransferEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
+        for (EventValuesWithLog eventValues : valueList) {
             TransferEventResponse typedResponse = new TransferEventResponse();
             typedResponse.log = eventValues.getLog();
             typedResponse.from = (String) eventValues.getIndexedValues().get(0).getValue();
@@ -189,7 +189,7 @@ public class ERC20 extends Contract {
         return web3j.ethLogFlowable(filter).map(new io.reactivex.functions.Function<Log, TransferEventResponse>() {
             @Override
             public TransferEventResponse apply(@NotNull Log log) throws Exception {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(TRANSFER_EVENT, log);
+                EventValuesWithLog eventValues = extractEventParametersWithLog(TRANSFER_EVENT, log);
                 TransferEventResponse typedResponse = new TransferEventResponse();
                 typedResponse.log = log;
                 typedResponse.from = (String) eventValues.getIndexedValues().get(0).getValue();
