@@ -91,8 +91,8 @@ public class EthereumBlock {
     @Override
     public String toString() {
         return "{" +
-                "hash: " + hash +
-                ", number: " + number +
+                "number: " + number +
+                ", hash: " + hash +
                 ", transactions: " + transactions.size() +
                 '}';
     }
