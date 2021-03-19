@@ -15,10 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.web3j.abi.TypeDecoder;
 import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.crypto.Credentials;
-import org.web3j.crypto.ECKeyPair;
-import org.web3j.crypto.Keys;
-import org.web3j.crypto.RawTransaction;
+import org.web3j.crypto.*;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -381,6 +378,25 @@ public final class FacadeEthereum implements IFacadeEthereum {
             log.warn("Enter: {}", e.getMessage());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Pair input(String input) {
+        StringBuilder sb = new StringBuilder(input);
+        String addressTo = sb.substring(10, 74);
+        String value = sb.substring(74);
+        try {
+            Method refMethod = TypeDecoder.class.getDeclaredMethod(
+                    "decode", String.class, int.class, Class.class
+            );
+            refMethod.setAccessible(Boolean.TRUE);
+            Address address = (Address) refMethod.invoke(null, addressTo, 0, Address.class);
+            Uint256 amount = (Uint256) refMethod.invoke(null, value, 0, Uint256.class);
+            return new Pair(amount.toString(), amount.getValue());
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            log.warn("Enter: {}", e.getMessage());
+        }
+        return null;
     }
 
     private void startBlockTracker(

@@ -4,6 +4,7 @@ import com.github.facade.ethrereum.model.Information;
 import com.github.facade.ethrereum.model.KeyPair;
 import com.github.facade.ethrereum.model.TransactionData;
 import io.reactivex.functions.Consumer;
+import org.web3j.crypto.Pair;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -80,5 +81,7 @@ public interface IFacadeEthereum extends IFacadeTokenERC20 {
     );
 
     Optional<Long> bastBlock();
+
+    Pair input(String input);
 
 }
