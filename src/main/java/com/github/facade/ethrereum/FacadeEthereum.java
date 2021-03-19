@@ -52,7 +52,7 @@ public final class FacadeEthereum implements IFacadeEthereum {
 
     private static final Logger log = LoggerFactory.getLogger(FacadeEthereum.class);
 
-    private final Web3j web3j;
+    private Web3j web3j;
 
     private Subscription transactionSub;
 
@@ -61,6 +61,9 @@ public final class FacadeEthereum implements IFacadeEthereum {
     private int time;
 
     private AtomicLong count;
+
+    public FacadeEthereum() {
+    }
 
     public FacadeEthereum(String url) {
         this.web3j = Web3j.build(new HttpService(url));
@@ -386,13 +389,13 @@ public final class FacadeEthereum implements IFacadeEthereum {
         String addressTo = sb.substring(10, 74);
         String value = sb.substring(74);
         try {
-            Method refMethod = TypeDecoder.class.getDeclaredMethod(
+            Method method = TypeDecoder.class.getDeclaredMethod(
                     "decode", String.class, int.class, Class.class
             );
-            refMethod.setAccessible(Boolean.TRUE);
-            Address address = (Address) refMethod.invoke(null, addressTo, 0, Address.class);
-            Uint256 amount = (Uint256) refMethod.invoke(null, value, 0, Uint256.class);
-            return new Pair(amount.toString(), amount.getValue());
+            method.setAccessible(Boolean.TRUE);
+            Address address = (Address) method.invoke(null, addressTo, 0, Address.class);
+            Uint256 amount = (Uint256) method.invoke(null, value, 0, Uint256.class);
+            return new Pair(address.toString(), amount.getValue());
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             log.warn("Enter: {}", e.getMessage());
         }

@@ -2,6 +2,7 @@ package com.github.facade.ethrereum.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.web3j.crypto.Pair;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -136,6 +137,23 @@ public final class TransactionData {
         return input;
     }
 
+    public TransactionData contract(Pair pair) {
+        return new TransactionData(
+                this.hash,
+                this.nonce,
+                this.blockHash,
+                this.blockNumber,
+                this.gasPrice,
+                this.gasLimit,
+                this.to,
+                this.from,
+                (String) pair.getFirst(),
+                (BigInteger) pair.getSecond(),
+                this.fee,
+                this.input
+        );
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -170,6 +188,7 @@ public final class TransactionData {
                 "hash='" + hash + '\'' +
                 ", from='" + from + '\'' +
                 ", to='" + to + '\'' +
+                ", contract='" + contact + '\'' +
                 '}';
     }
 }
